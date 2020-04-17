@@ -1,0 +1,530 @@
+# https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler/hack
+
+---
+# server.conf:
+# [req]
+# req_extensions = v3_req
+# distinguished_name = req_distinguished_name
+# [req_distinguished_name]
+# [ v3_req ]
+# basicConstraints = CA:FALSE
+# keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+# extendedKeyUsage = clientAuth, serverAuth
+
+# openssl genrsa -out ${TMP_DIR}/caKey.pem 2048
+# openssl req -x509 -new -nodes -key ${TMP_DIR}/caKey.pem -days 100000 -out ${TMP_DIR}/caCert.pem -subj "/CN=vpa_webhook_ca"
+
+# openssl genrsa -out ${TMP_DIR}/serverKey.pem 2048
+# openssl req -new -key ${TMP_DIR}/serverKey.pem -out ${TMP_DIR}/server.csr -subj "/CN=vpa-webhook.kube-system.svc" -config ${TMP_DIR}/server.conf
+# openssl x509 -req -in ${TMP_DIR}/server.csr -CA ${TMP_DIR}/caCert.pem -CAkey ${TMP_DIR}/caKey.pem -CAcreateserial -out ${TMP_DIR}/serverCert.pem -days 100000 -extensions v3_req -extfile ${TMP_DIR}/server.conf
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vpa-tls-certs
+  namespace: kube-system
+type: Opaque
+data:
+  caCert.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURGVENDQWYyZ0F3SUJBZ0lVUE1KM3AxRjZxWGRIZHJmRGg1MmtxSXQ5aGlrd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0dURVhNQlVHQTFVRUF3d09kbkJoWDNkbFltaHZiMnRmWTJFd0lCY05NakF3TkRFek1URXlOakF6V2hnUApNakk1TkRBeE1qY3hNVEkyTUROYU1Ca3hGekFWQmdOVkJBTU1Eblp3WVY5M1pXSm9iMjlyWDJOaE1JSUJJakFOCkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQWxaK0NHVGJvSGxIbFhDVVFpbmZhVmNHcDhNYXoKTG9MUkR3aGhqRm5nMFlzQVdwRjV6a0lhQ2Z0RHl2QitCN1NIcmdjWmNhZHllREZQeitRS09XUnlPQ1c1bzNOYwpZemtqVVR6UUlFdDRFeXlQYlZDQktwdEk0RThUMTJGOExxc3pITFVFYU9VWCtnbjJNNm9kdXdHL1FqM2JQMlhuCnRLaWlkakZwN25VOEhKOUxtVExOTXFNb3AvcnpnSFB3a3dYNEgvSnkxY1VieEpwbE5GVXR3UXVzc0p3OEFHSGMKU3B4eUFBL2VKVGxNR09nMnpMRXVIMjJ5RnJodGtjN04vVlpBK0Zta3hjcXAxYlVaS3Z3K3FBL2VaV2lnOUw2YQpsd1RnUHZIeFJyU1plVm52cHYxdHhtQjNMODVhWkdWcHlqTWFyUThkTFp0emlmY3Z5MW5CQnFzZGR3SURBUUFCCm8xTXdVVEFkQmdOVkhRNEVGZ1FVcmZ5VHcwcXV1MFVqVzFkclJlQkQ4SmJqNFZZd0h3WURWUjBqQkJnd0ZvQVUKcmZ5VHcwcXV1MFVqVzFkclJlQkQ4SmJqNFZZd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQgpBUXNGQUFPQ0FRRUFmTXpBUjAzc2FNK3ovbG1lZlJGQ3JSdWFtVjVnQW5WMDdIY3dIb2NkUXNZc3FYR2t1cHloCmRYT1Y4eG51SmduL2J1MEZSeGxXVkl4M1FWQVVRbDJvZlFzLzFWeEpUTkdNVHZzbkhIdnI2NE9MWC82dXBvbWkKaXk1dEhOS0o2NXFEaHJBbTIxUDJZcEFWa2FFR1ZzbUEwayttR1pGSEtUejdHMFd0M1pXWGREc3h4VE5SMTlOTAptWk9McjFMU1F3UDBCNlE4MExXclhiYkR2a3VhWkFFb0ZPQlFBMGFaa1FEdEljbTJyTjRub1U2WkVWWnhBbitkCmJjL1NqQXdYc3hlL1Rqcko2VERTVWp3aGljSk5zTUlLUW9Tb0lSTHI2MDRxaTJUaWM3RHVqSzFFcDhHeGRrTTIKeTZtMEVtOSs0WEk3TlBJOWVBMlhsU0FvQ0NCYjR0MGVWQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  caKey.pem: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBbForQ0dUYm9IbEhsWENVUWluZmFWY0dwOE1hekxvTFJEd2hoakZuZzBZc0FXcEY1CnprSWFDZnREeXZCK0I3U0hyZ2NaY2FkeWVERlB6K1FLT1dSeU9DVzVvM05jWXpralVUelFJRXQ0RXl5UGJWQ0IKS3B0STRFOFQxMkY4THFzekhMVUVhT1VYK2duMk02b2R1d0cvUWozYlAyWG50S2lpZGpGcDduVThISjlMbVRMTgpNcU1vcC9yemdIUHdrd1g0SC9KeTFjVWJ4SnBsTkZVdHdRdXNzSnc4QUdIY1NweHlBQS9lSlRsTUdPZzJ6TEV1CkgyMnlGcmh0a2M3Ti9WWkErRm1reGNxcDFiVVpLdncrcUEvZVpXaWc5TDZhbHdUZ1B2SHhSclNaZVZudnB2MXQKeG1CM0w4NWFaR1ZweWpNYXJROGRMWnR6aWZjdnkxbkJCcXNkZHdJREFRQUJBb0lCQUdEZkQvMUJObEdERm10dApOK05lcThhQUI0WHpMOGw2T3Q1dnY3Qjk5SGZXZGhrdFBONlVuNFU4Myt5QmZpZUE4Nk54eDBCMWVFQm5OTlJWClFXVmRLakkrQW8zWHY4WWlGVUtnaStPTTJTWVk0SmVXMnJuNkpkbk1lUDBtaVo4eGluc1ltODFLSGhidDRqQWIKQVBxMXE5MjRiTDRFUFZzVEgzUkVrK0FtbVEreCtYUGlOT2cwcjJVeXVxa0FpbElBQklZRk5rUzVWbXNpOUo3dQpLSHFXY2s4NUFLaTV3Qm1EemZkRERiMTdUaklZVDljSGF6ejM2WTVtVVlIMDFJTk02Z1JkUjc5QjBhY1V6eDJ3Clp0bEpBd1d1eWlBRGJJZnJvdE9IZjFzVm85MUVqZEZYeHlWZDlENGlDYnVlZmFCQ0lIbTJjdnN2ZW1paU9MTkIKa3hJckFMa0NnWUVBdzlrN0FUd2REWXBWeTNLL1lpd2UwN1Qzc3NXbmlsaVlzWVFKdEZ6T1lTN0MvOHJHRGMzRwpuaEsxS0pTN2pKTFpGb0srV2pOVlQycXVMaFFaUG5abnJ0NjkrMHNIKzFIZWRoSHdaQlYyM2VNejdMOVNxNkVPClhpWWtNdENkaGd3SnF6a0tqUmMxQjg5bjJvdlNlNVJQb2liSzlMbDlRZ1FhWlNWaEsrUVREL1VDZ1lFQXc1UEIKLzdQSkllMlozT2o4T3U4R1ZOWEljdHhrNlVoSDlKVnlwdkhYamp6ZnJHZ2hFK2ZNOTlBZmJQK1dySHJtZ1Eregpoa29EM25TMEFJL1RSQkxTOUVwc0FRNVlJTEN6RHJGeDZRZkhHY3ZPdXRjcWE1bm1QL29JSXB4b1pqMndveGZOCkpHNThYTVo1L09PQzBlOFBEcURuWVNCMmoxbzgyN09mYnFOV3NEc0NnWUFVOUZVZjJMS3pGQzRCeXBFM2k4ancKbGRnNnhITWNsa1lnR0NTQnE3eFpJWXV6bXBwK041b2NwNXZDYjhkeFR2VHpONkh1UExmUCszWVBjQThUWTgvTQpJZ0RwdGlsd2RsMzYvQWhnYlB0KzJpUmdIRWhZSEs5UTIzdmNBLzRXcllzTFN0c2FKWFdERkdua05EbWRCMDFOCjZDQ205b0cwWW9RQWRuTmpJcy8zVVFLQmdRQ2k5Q0RtK1poeklYSmFvdkZOOVV3ME1TL2pyQWlVYXJveGFyZnQKcTRGcnJRSzh0c0lnd0xtQ0hUR2g4czlMQk5lNzN5WTRsTURtZ0J4ZWYzZUt0NWgzSE84aWJoNDFscVNLY0lTMQpvZHBkZnZmUHEybFg0Qkg5YWttTzlQenpleUVLc3RFbE1yMkIyNGxXa1FXMS8xWnZYTmVNa0t6WVFscUV3QVB0Ci9rQkRjd0tCZ1FDalUrbjF1NFE0Mk91ZXowdjdjaXhKaTRLMm5rZzc3Q1ZJZUJucVpjdzVpWnZCc2VhTmdvN2EKbmZLRzBFendnRUY2RTRsS3JuVXY5ekY1UVB2Ykk2MEw3TWtjVUc4RzRJNFFxdDFjUC9jT1BiN2t2b0h2QW52bApjZzNFQWczZ3FMa3RTOXZxR1lWMlUzYWdUdFFlZFlyRnhTSEJ4TGZsaUpBRzJxTFJlUVc3K3c9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+  serverCert.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDRENDQWZDZ0F3SUJBZ0lVS3RyMEZhQjc2WE5ZSWRZWkZSVXliQjZqMkdrd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0dURVhNQlVHQTFVRUF3d09kbkJoWDNkbFltaHZiMnRmWTJFd0lCY05NakF3TkRFek1URXlOakF6V2hnUApNakk1TkRBeE1qY3hNVEkyTUROYU1DWXhKREFpQmdOVkJBTU1HM1p3WVMxM1pXSm9iMjlyTG10MVltVXRjM2x6CmRHVnRMbk4yWXpDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTDhCYmVyUmRTVHIKY1czaDNxQWFCM3R5d3NQdm9XeDNPVk1QTHJXOEk3TisyRzJwaGlwbFoyRmpLdDJMeUJXT3NjR1E3a1BjNmxXLwp3UXFyT3FRd2UyY1ppOTVHOU1Wb2g4N2Q4RDZpVjEvbE9hRUtVWHp3OE1hSThjYVh2Q0l6Nk1VZG9CamZFRFhkCklROThNTGROd3hiNjl6dWdqTnQrb3daSXV1aU5MMGZmT2pRTDl0a2pLMU96RGgyeVFXN1pvVk9TaGZ5aWpDSEcKRXp6YU1ySktLMEJHZExxbUtKd1B3RWhHdVlPalUvNERyZjlZYURNZklyc0pzd1NvR1ZYR0JNOWpJNzNoUDhZSwpyN3lOdVhDYmNhMDlyZnFUY214ZUNHRGhkTXlaVGZtN1gzaE52anRjcjBJQTlFYmMyL25GS202eHl0eEE4S3dNCjRpU2R1c0txbzZzQ0F3RUFBYU01TURjd0NRWURWUjBUQkFJd0FEQUxCZ05WSFE4RUJBTUNCZUF3SFFZRFZSMGwKQkJZd0ZBWUlLd1lCQlFVSEF3SUdDQ3NHQVFVRkJ3TUJNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJMYVVSNQp2K3g3bVRwTHlpN0owcUwyZXgxZ29nM2pTQkJUc1BqWHdxTzRHSFVwV1dSL09lRHlXcDhSb3pGUDI0cjI5czFFCkFDRCtic08yR0l0WDdlL1RMR3lxV2xVT0VDZ1hhNGdDSlZWSER6SGlhaFBQbDFNY2lJQkFtaEFwU3R3MitPUDgKaUtuUUdrb2N6R21hTmVDNFMxZklVeE1MOHVUNDhoNVJzRU03OHJVQUZsVWVDVjRFZFJTTDQ5WGxjOVRtNm5KKwo1cGxWVmNHQmVKTnJkZjlVOHRHMDlxODdRazFHVm13QlM5U0Q4L2ppMEFpMzVRTURPcStNNlZ6WURrWUExL2dkCkhoc1Z0RHVGSm9xOElqSVc0eUlKK29xS2tTNy96ZEZYaEFXT2hpYmx5dVBzZ1RuSFJ0VUY2VEJaUEsrd1Y1dGUKeVYydG9SQWZ3Wis1SWpNVgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  serverKey.pem: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBdndGdDZ0RjFKT3R4YmVIZW9Cb0hlM0xDdysraGJIYzVVdzh1dGJ3anMzN1liYW1HCkttVm5ZV01xM1l2SUZZNnh3WkR1UTl6cVZiL0JDcXM2cERCN1p4bUwza2IweFdpSHp0M3dQcUpYWCtVNW9RcFIKZlBEd3hvanh4cGU4SWpQb3hSMmdHTjhRTmQwaEQzd3d0MDNERnZyM082Q00yMzZqQmtpNjZJMHZSOTg2TkF2MgoyU01yVTdNT0hiSkJidG1oVTVLRi9LS01JY1lUUE5veXNrb3JRRVowdXFZb25BL0FTRWE1ZzZOVC9nT3QvMWhvCk14OGl1d216QktnWlZjWUV6Mk1qdmVFL3hncXZ2STI1Y0p0eHJUMnQrcE55YkY0SVlPRjB6SmxOK2J0ZmVFMisKTzF5dlFnRDBSdHpiK2NVcWJySEszRUR3ckF6aUpKMjZ3cXFqcXdJREFRQUJBb0lCQVFDSE9QN1ZPRGFEemI5KworR0pBM0V5aHcreEpCTlEyVXUyZGRPa3Z0aU5jUnhmNEF3VTk3STVVN3YwQTNaM29UUjVoR0RibWluYklBRG90ClVHM3lvWFFyMkhVaUJ2L3c1Z0VIbmk0Z1daUWNDczlTeUZoS2FOVTg2T1NxSVBBTEVzN2ZCZ3M2c0dqc2lVR0gKa2ZkM1BqRTRpcklQWDZsNUYxMVk3SktPWXEydlpnamo0aWM0V1dhZTFueDV5ZTNtaVVodEZuVVlHa1BWcVF5WAo1dnFjV0RBMkVwUjRGM2diS2h2bmRNOGkvM1BiNXp5SGkrN0NFUjh6UWZjQm10ZVlqaERtVEo2ZlNHMFBOS0VRCmQwY3FCR3E5MVVud0VkVDRyS1J0S1pIekZYTjh5UXVvUVV5MVB2U25Ya0V1M1I1ajhxNWRObVJCNXNsdHJCNjIKcFY5WTQwSmhBb0dCQVAybzFUZ2t0WjdjRnRudkswYmFncUtTZFVnT00wdHM3VGlrQlZJbU12eU9qdU93dGF4NAplZFNCc1huQzF0VFVnNVNTRDRPQ25pa2NJNXplUHR5VEFFalBnNlN5RkpkSzM1cDM2bjlEaTB3UmlkbDh1cDNPCmp3YkJkQWx4YkpuSUVjT2lxekRQRFgrVjZkb0xQMmVJQUlaS0xVc1c5OXZpODl1SmVkN2JYZGl4QW9HQkFNREUKbWlaQU02bnJPYTkxdlp3N1FkZERTcVBFUUNUVGtHOGI0MDJHQmJYckJpUENVNnNOT0x2aFBYZGZIMyt0eGZNaApaS1VvNjZnSHBrTlVuRnRXVUpsSlNZNVVrNGhWQlhadFRsR29SSkMvWDZIOHJtazRHQVVwSG4xUDlJUFk5V3h4Ck5ESDEycGJCZDBiVXVndXYyZ3c0d0lBWm55alAxNzYyaDJtK001a2JBb0dCQUxuVFZKaHp0Q1h6NEQyNXk3OTEKVnB4WXBOaXJwb0pNQXlFcWI4ZDF1b1p3dlZjcVhuMUNLU1kzK05kVm1HS0VhUHlQWUJRY3ZWY3FpU0JqWkRQYwo4U2xsOUcvVUVlZWY3MTFQR2hndldEM2EzMXpYMWpMRFh0NDVISlBLWngvbGhMWUlWbGRFYUFRZXhCbDdnZkNMCm5xN0NhcG9HOG45QXJSc1loSkp4ckRlUkFvR0FYR05keGd0ck4zc0hrTEtMaDc5VzFRYnBWUWdQL2hadjJQQ3kKeGtyL25hcmdyRzdNanVTdFZrNmptUHk4S2dOdEpoUFJHdDg3NHJLWDJ4bElQdlpsZHJJTFVPMzBMNWtnSHh4UQpOdzdBbmVjNnZIWlFXUm1MV1ozVmdSVzdDUjRJc2txblMzS2JxemxhSTFaOVBIQ3h2cjNNZFJqU2tVcmNDZ21OCmFQN0IyQlVDZ1lCb1BXeTBpNHg2L3F6K3M2Q2JMMUZsYi9kTkRHZzZWVlJGQ3BweC81aTQ5c05HTWRMTWlRRk4KYzdSZDlBR1h0MVBOUjBaUEdOVEN6ZDRERHNOM3V4M1NHQVR6Nm92N0txTWFCMFVLOEovNTQ5ckVJd1ZNSkNHRwpLVXY5ZWt3MEdxL1R2MWhyQTk0VzZwenc4OFhTUXVZazc4LzFQcWZ6UjF1a29Cb0ltZ2VFM3c9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:metrics-reader
+rules:
+  - apiGroups:
+      - "metrics.k8s.io"
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:vpa-actor
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - nodes
+      - limitranges
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+  - apiGroups:
+      - "poc.autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - "autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:vpa-checkpoint-actor
+rules:
+  - apiGroups:
+      - "poc.autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalercheckpoints
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+      - delete
+  - apiGroups:
+      - "autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalercheckpoints
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:evictioner
+rules:
+  - apiGroups:
+      - "extensions"
+    resources:
+      - replicasets
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - pods/eviction
+    verbs:
+      - create
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:vpa-target-reader
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - replicationcontrollers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:admission-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - configmaps
+      - nodes
+      - limitranges
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "admissionregistration.k8s.io"
+    resources:
+      - mutatingwebhookconfigurations
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+  - apiGroups:
+      - "poc.autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "autoscaling.k8s.io"
+    resources:
+      - verticalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:metrics-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:metrics-reader
+subjects:
+  - kind: ServiceAccount
+    name: vpa-recommender
+    namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:vpa-actor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:vpa-actor
+subjects:
+  - kind: ServiceAccount
+    name: vpa-recommender
+    namespace: kube-system
+  - kind: ServiceAccount
+    name: vpa-updater
+    namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:vpa-checkpoint-actor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:vpa-checkpoint-actor
+subjects:
+  - kind: ServiceAccount
+    name: vpa-recommender
+    namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:vpa-target-reader-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:vpa-target-reader
+subjects:
+  - kind: ServiceAccount
+    name: vpa-recommender
+    namespace: kube-system
+  - kind: ServiceAccount
+    name: vpa-admission-controller
+    namespace: kube-system
+  - kind: ServiceAccount
+    name: vpa-updater
+    namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:vpa-evictionter-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:evictioner
+subjects:
+  - kind: ServiceAccount
+    name: vpa-updater
+    namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:admission-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:admission-controller
+subjects:
+  - kind: ServiceAccount
+    name: vpa-admission-controller
+    namespace: kube-system
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vpa-admission-controller
+  namespace: kube-system
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vpa-updater
+  namespace: kube-system
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vpa-recommender
+  namespace: kube-system
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-updater
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-updater
+  template:
+    metadata:
+      labels:
+        app: vpa-updater
+    spec:
+      serviceAccountName: vpa-updater
+      containers:
+        - name: updater
+          image: k8s.gcr.io/vpa-updater:0.7.0
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 200m
+              memory: 1000Mi
+            requests:
+              cpu: 50m
+              memory: 500Mi
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-recommender
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-recommender
+  template:
+    metadata:
+      labels:
+        app: vpa-recommender
+    spec:
+      serviceAccountName: vpa-recommender
+      containers:
+      - name: recommender
+        image: k8s.gcr.io/vpa-recommender:0.7.0
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 200m
+            memory: 1000Mi
+          requests:
+            cpu: 50m
+            memory: 500Mi
+        ports:
+        - containerPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-admission-controller
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpa-admission-controller
+  template:
+    metadata:
+      labels:
+        app: vpa-admission-controller
+    spec:
+      serviceAccountName: vpa-admission-controller
+      containers:
+        - name: admission-controller
+          image: k8s.gcr.io/vpa-admission-controller:0.7.0
+          imagePullPolicy: Always
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: tls-certs
+              mountPath: "/etc/tls-certs"
+              readOnly: true
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
+            requests:
+              cpu: 50m
+              memory: 200Mi
+          ports:
+            - containerPort: 8000
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: vpa-tls-certs
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpa-webhook
+  namespace: kube-system
+spec:
+  ports:
+    - port: 443
+      targetPort: 8000
+  selector:
+    app: vpa-admission-controller
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: verticalpodautoscalers.autoscaling.k8s.io
+spec:
+  group: autoscaling.k8s.io
+  scope: Namespaced
+  names:
+    plural: verticalpodautoscalers
+    singular: verticalpodautoscaler
+    kind: VerticalPodAutoscaler
+    shortNames:
+      - vpa
+  version: v1beta1
+  versions:
+    - name: v1beta1
+      served: false
+      storage: false
+    - name: v1beta2
+      served: true
+      storage: true
+    - name: v1
+      served: true
+      storage: false
+  validation:
+    # openAPIV3Schema is the schema for validating custom objects.
+    openAPIV3Schema:
+      properties:
+        spec:
+          type: object
+          required: []
+          properties:
+            targetRef:
+              type: object
+            updatePolicy:
+              type: object
+              properties:
+                updateMode:
+                  type: string
+            resourcePolicy:
+              type: object
+              properties:
+                containerPolicies:
+                  type: array
+                  items:
+                    type: object
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: verticalpodautoscalercheckpoints.autoscaling.k8s.io
+spec:
+  group: autoscaling.k8s.io
+  scope: Namespaced
+  names:
+    plural: verticalpodautoscalercheckpoints
+    singular: verticalpodautoscalercheckpoint
+    kind: VerticalPodAutoscalerCheckpoint
+    shortNames:
+      - vpacheckpoint
+  version: v1beta1
+  versions:
+    - name: v1beta1
+      served: false
+      storage: false
+    - name: v1beta2
+      served: true
+      storage: true
+    - name: v1
+      served: true
+      storage: false
